@@ -1,8 +1,9 @@
+# haslib is used for generating hashes
+import hashlib
+
 # os is used to generate a cryptographically strong salt. Alternative: secrets
 import os
 
-# haslib is used for generating hashes
-import hashlib
 
 class Dblogin:
     
@@ -42,6 +43,7 @@ class Dblogin:
                 the salted password is stored.
     @param saltCol: A string representing the column name where
                 the salt is stored.
+    @returns boolean: True if the credentials match, else False.
     '''
     def sqlVerification(self, cursor,
                         tableName, usernameCol, passwordCol, saltCol):
@@ -60,8 +62,25 @@ class Dblogin:
 
         return False
 
+    '''
+    Description: This function is used for updating the current salt
+                and returning the new salted password.
+    @returns 2 values: salted password, salt
+    '''
+    def newCredentials(self):
+        
+        # Random salt which is cryptografically safe
+        self.salt = os.urandom(32)
 
+        saltedPassword = hashlib.pbkdf2_hmac('sha256',
+                                             self.password.encode('utf-8'),
+                                             self.salt.encode('utf-8'),
+                                             100000).hex()[:32]
+        
+        return saltedPassword, self.salt
     
+    
+
 
 
 
