@@ -8,7 +8,6 @@ class Dblogin:
     
     # The user's password is hashed and is never stored as plain text.
     def __init__(self, username, password):
-        if()
         self.username = username
         self.password = hashlib.sha256(password.encode('utf-8')).hexdigest()
         self.salt = None
@@ -33,11 +32,21 @@ class Dblogin:
     '''
     Description: This function uses string formatting & parameterized
                 queries to safely query a database via the cursor.
+    @param cursor: A pymysql (or similar) connection cursor object
+                used for connecting to the SQL database.
+    @param tableName: A string representing the table name where
+                login data is stored.
+    @param usernameCol: A string representing the column name where
+                the username is stored.
+    @param passwordCol: A string representing the column name where
+                the salted password is stored.
+    @param saltCol: A string representing the column name where
+                the salt is stored.
     '''
     def sqlVerification(self, cursor,
                         tableName, usernameCol, passwordCol, saltCol):
 
-        # Parameterized Query
+        # Parameterized Query (safeguard against SQL Injection)
         query = "SELECT * FROM %s WHERE %s = '%s'"
         cursor.execute(query, (tableName, usernameCol, self.username))
 
@@ -51,7 +60,7 @@ class Dblogin:
 
         return False
 
-    
+
     
 
 
