@@ -79,6 +79,44 @@ class Dblogin:
         
         return saltedPassword, self.salt
     
+    '''
+    Description: This function is used for updating the current salt
+                and returning the new salted password.
+    @param cursor: A pymysql (or similar) connection cursor object
+                used for connecting to the SQL database.
+    @param tableName: A string representing the table name where
+                login data is stored.
+    @param usernameCol: A string representing the column name where
+                the username is stored.
+    @param passwordCol: A string representing the column name where
+                the salted password is stored.
+    @param saltCol: A string representing the column name where
+                the salt is stored.
+    @returns 2 values: salted password, salt
+    '''
+    def sqlNewCredentials(self, cursor,
+                        tableName, usernameCol, passwordCol, saltCol):
+
+        saltedPassword = self.newCredentials()[0]
+
+        # Parameterized Query (safeguard against SQL Injection)
+        query = "SELECT * FROM %s WHERE %s = '%s'"
+        cursor.execute(query, (tableName, usernameCol, self.username))
+
+        # If such a column was found in the database
+        if(cursor.fetchall() != ()):
+            query = "UPDATE %s SET %s = %s, %s = %s WHERE %s = '%s'"
+            cursor.execute(query, (tableName,
+                                   passwordCol, saltedPassword, saltCol,
+                                   self.salt, usernameCol, self.username))
+        else:
+            query = "INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)"
+            cursor.execute(query, (tableName,
+                                   usernameCol, passwordCol, saltCol,
+                                   self.username, saltedPassword, self.salt))
+            
+
+        return saltedPassword, self.salt
     
 
 
