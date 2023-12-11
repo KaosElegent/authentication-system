@@ -67,7 +67,7 @@ class Dblogin:
                 and returning the new salted password.
     @returns 2 values: salted password, salt
     '''
-    def newCredentials(self):
+    def setCredentials(self):
         
         # Random salt which is cryptografically safe
         self.salt = os.urandom(32)
@@ -94,7 +94,7 @@ class Dblogin:
                 the salt is stored.
     @returns 2 values: salted password, salt
     '''
-    def sqlNewCredentials(self, cursor,
+    def setSqlCredentials(self, cursor,
                         tableName, usernameCol, passwordCol, saltCol):
 
         saltedPassword = self.newCredentials()[0]
