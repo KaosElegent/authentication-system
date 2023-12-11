@@ -5,9 +5,10 @@ import os
 import hashlib
 
 class Dblogin:
-
+    
     # The user's password is hashed and is never stored as plain text.
     def __init__(self, username, password):
+        if()
         self.username = username
         self.password = hashlib.sha256(password.encode('utf-8')).hexdigest()
         self.salt = None
@@ -28,6 +29,30 @@ class Dblogin:
 
         if(dbPassword == saltedPassword): return True
         else: return False
+
+    '''
+    Description: This function uses string formatting & parameterized
+                queries to safely query a database via the cursor.
+    '''
+    def sqlVerification(self, cursor,
+                        tableName, usernameCol, passwordCol, saltCol):
+
+        # Parameterized Query
+        query = "SELECT * FROM %s WHERE %s = '%s'"
+        cursor.execute(query, (tableName, usernameCol, self.username))
+
+        # If such a column was found in the database
+        if(cursor.fetchall() != ()):
+
+            # Fetch the first row (Ideally there's only 1 row)
+            record = cursor.fetchall()[0] 
+            if self.verify(record[passwordCol], record[saltCol]):
+                return True
+
+        return False
+
+    
+    
 
 
 
