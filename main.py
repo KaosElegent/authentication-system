@@ -4,8 +4,14 @@ Date: December 11th, 2023
 '''
 # Requirements
 #import pymysql.cursors    #If using pymysql for database connection
-import csv                 #If using csv files
-import base64              #For storing the bytes of salt in a csv
+
+# Since I'm using csv for demo here
+import csv
+
+# b64encode is used to convert the random 32 byte salt to a
+# 32 byte utf-8 string for storage in string format
+from base64 import b64encode
+
 from saltedLogin import Dblogin
 
 
@@ -37,7 +43,7 @@ def login():
         for row in rows:
             if details.username == row[0]:
                 
-                if details.verify(row[1],row[2]):
+                if details.verify(row[1], row[2].encode('utf-8')):
                     print ("Login Successful!\n")
                 else:
                     print ("Information Entered Was Incorrect!\n")
@@ -51,11 +57,11 @@ def alter():
         if(input("Confirm? (y/n)").lower() == 'y'): break
         else: print("Enter again!\n")
 
-    saltedPassword, salt = details.setCredentials()
+    saltedPassword, salt = details.setCredentials(strSalt=True)
     with open('login.csv', 'w', newline='\n') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
 
-        writer.writerow([details.username, saltedPassword, salt]) 
+        writer.writerow([details.username, saltedPassword, salt.decode('utf-8')])
 
 def menu():
     while(True):

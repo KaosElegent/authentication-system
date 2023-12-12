@@ -2,15 +2,18 @@
 import hashlib
 
 # os is used to generate a cryptographically strong salt. Alternative: secrets
-import os
+from os import urandom
 
-# codecs is used to store the salt as a unicode string
+# b64encode is used to convert the random 32 byte salt to a
+# 32 byte utf-8 string for storage in string format
 from base64 import b64encode
 
 
 class Dblogin:
     
     # The user's password is hashed and is never stored as plain text.
+    # Note: This object uses the salt as a byte-like object.
+    # But for real use case a normal 32 byte string would be used
     def __init__(self, username, password):
         self.username = username
         self.password = hashlib.sha256(password.encode('utf-8')).hexdigest()
@@ -28,7 +31,7 @@ class Dblogin:
         # Hashing the password user entered with the salt from the database
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
-                                             salt.encode('utf-8'),
+                                             salt,
                                              100000).hex()[:32]
 
         if(dbPassword == saltedPassword): return True
@@ -69,9 +72,14 @@ class Dblogin:
     '''
     Description: This function is used for updating the current salt
                 and returning the new salted password.
+    @param strSalt: This is a flag (False by default).
+                If True, the salt generated has bytes that
+                can be decoded to utf-8.
+                If False, the random salt generated has random
+                bytes which can't be decoded to utf-8.
     @returns 2 values: salted password, salt
     '''
-    def setCredentials(self):
+    def setCredentials(self, strSalt = 0):
         
         # 32 Random cryptografically safe bytes
         '''
@@ -81,12 +89,14 @@ class Dblogin:
         work with the byte-like object while keeping it just as
         randomized.
         '''
-        self.salt = b64encode(os.urandom(33)).decode('utf-8')[:32]
-
+        if strSalt:
+            self.salt = b64encode(urandom(32))[:32]
+        else:
+            self.salt = urandom(32)
 
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
-                                             self.salt.encode('utf-8'),
+                                             self.salt,
                                              100000).hex()[:32]
         return saltedPassword, self.salt
     
