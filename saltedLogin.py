@@ -21,10 +21,11 @@ class Dblogin:
     @returns boolean: True if the credentials match, else False.
     '''
     def verify(self, dbPassword, salt):
+        print(type(salt))
         # Hashing the password user entered with the salt from the database
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
-                                             salt.encode('utf-8'),
+                                             salt,
                                              100000).hex()[:32]
 
         if(dbPassword == saltedPassword): return True
@@ -69,14 +70,13 @@ class Dblogin:
     '''
     def setCredentials(self):
         
-        # Random salt which is cryptografically safe
+        # 32 Random cryptografically safe bytes
         self.salt = os.urandom(32)
 
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
-                                             self.salt.encode('utf-8'),
+                                             self.salt,
                                              100000).hex()[:32]
-        
         return saltedPassword, self.salt
     
     '''
@@ -123,4 +123,5 @@ class Dblogin:
 
 
 if __name__ == '__main__':
-    pass
+    test = Dblogin("Kaos", "test123")
+    print(test.setCredentials())
