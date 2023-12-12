@@ -5,6 +5,7 @@ Date: December 11th, 2023
 # Requirements
 #import pymysql.cursors    #If using pymysql for database connection
 import csv                 #If using csv files
+import base64              #For storing the bytes of salt in a csv
 from saltedLogin import Dblogin
 
 
@@ -34,9 +35,9 @@ def login():
 
         rows = csv.reader(csvFile, delimiter=',')
         for row in rows:
-            if details.username == row[1]:
-                print(row[3])
-                if details.verify(row[2],bytes(row[3], 'utf-8')):
+            if details.username == row[0]:
+                
+                if details.verify(row[1],row[2]):
                     print ("Login Successful!\n")
                 else:
                     print ("Information Entered Was Incorrect!\n")
@@ -44,7 +45,17 @@ def login():
         print ("Information Entered Was Incorrect!\n")
         return
 
+def alter():
+    while(True):
+        details = Dblogin(input("Username: "), input("Password: "))
+        if(input("Confirm? (y/n)").lower() == 'y'): break
+        else: print("Enter again!\n")
 
+    saltedPassword, salt = details.setCredentials()
+    with open('login.csv', 'w', newline='\n') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+
+        writer.writerow([details.username, saltedPassword, salt]) 
 
 def menu():
     while(True):

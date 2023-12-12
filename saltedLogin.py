@@ -4,6 +4,9 @@ import hashlib
 # os is used to generate a cryptographically strong salt. Alternative: secrets
 import os
 
+# codecs is used to store the salt as a unicode string
+from base64 import b64encode
+
 
 class Dblogin:
     
@@ -21,11 +24,11 @@ class Dblogin:
     @returns boolean: True if the credentials match, else False.
     '''
     def verify(self, dbPassword, salt):
-        print(type(salt))
+
         # Hashing the password user entered with the salt from the database
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
-                                             salt,
+                                             salt.encode('utf-8'),
                                              100000).hex()[:32]
 
         if(dbPassword == saltedPassword): return True
@@ -71,11 +74,19 @@ class Dblogin:
     def setCredentials(self):
         
         # 32 Random cryptografically safe bytes
-        self.salt = os.urandom(32)
+        '''
+        the 32 randombytes from urandom are encoded in base64
+        to remove any non utf-8 bytes. Having utf-8 bytes might
+        sound less secure but this makes it easier to store and
+        work with the byte-like object while keeping it just as
+        randomized.
+        '''
+        self.salt = b64encode(os.urandom(33)).decode('utf-8')[:32]
+
 
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
-                                             self.salt,
+                                             self.salt.encode('utf-8'),
                                              100000).hex()[:32]
         return saltedPassword, self.salt
     
