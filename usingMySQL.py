@@ -5,7 +5,8 @@ Date: December 14th, 2023
 
 # To use environment variables
 import os
-import load_dotenv
+from dotenv import load_dotenv
+
 load_dotenv()
 
 # Since I'm using a MySQL database for demo here

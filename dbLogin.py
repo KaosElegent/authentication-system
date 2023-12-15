@@ -14,6 +14,8 @@ import pandas as pd
 # This project assumes the password and salt are stored in seperate columns.
 # This doesnt affect security in any way, good or bad.
 # All functions do nothing if more than 1 row has the same username
+
+
 class Dblogin:
 
     # The user's password is hashed and is never stored as plain text.
@@ -33,7 +35,7 @@ class Dblogin:
     '''
 
     def verify(self, dbPassword, salt):
-        
+
         # Hashing the password user entered with the salt from the database
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
@@ -66,14 +68,13 @@ class Dblogin:
 
         # Parameterized Query (safeguard against SQL Injection)
         query = "SELECT * FROM %s WHERE %s = '%s'"
-        cursor.execute(query, (tableName, usernameCol, self.username))
+        cursor.execute(query % (tableName, usernameCol, self.username))
 
+        # Fetch the rows (Ideally there's only 1 row)
+        records = cursor.fetchall()
         # If such a column was found in the database
-        if (cursor.fetchall() != ()):
-
-            # Fetch the first row (Ideally there's only 1 row)
-            records = cursor.fetchall()
-            if(len(records) == 1):
+        if (records != []):
+            if (len(records) == 1):
                 if self.verify(records[0][passwordCol], records[0][saltCol].encode('utf-8')):
                     return True
 
@@ -96,14 +97,14 @@ class Dblogin:
                         usernameCol, passwordCol, saltCol):
 
         df = pd.read_csv(filePath)
-        row =  df.loc[df[usernameCol] == self.username]
+        row = df.loc[df[usernameCol] == self.username]
 
-        if(len(row) == 1):
+        if (len(row) == 1):
             if self.verify(row[passwordCol].iloc[0], row[saltCol].iloc[0].encode('utf-8')):
                 return True
 
         return False
-    
+
     '''
     Description: This function is used for updating the current salt
                 and returning the new salted password.
@@ -152,27 +153,24 @@ class Dblogin:
     def setSqlCredentials(self, cursor,
                           tableName, usernameCol, passwordCol, saltCol):
 
-        saltedPassword = self.newCredentials()[0]
+        saltedPassword = self.setCredentials()[0]
 
         # Parameterized Query (safeguard against SQL Injection)
         query = "SELECT * FROM %s WHERE %s = '%s'"
-        cursor.execute(query, (tableName, usernameCol, self.username))
-
+        cursor.execute(query % (tableName, usernameCol, self.username))
+        records = cursor.fetchall()
         # If such a column was found in the database
-        if(len(cursor.fetchall()) == 1):
-            if (cursor.fetchall() != ()):
-                query = "UPDATE %s SET %s = %s, %s = %s WHERE %s = '%s'"
-                cursor.execute(query, (tableName,
-                                    passwordCol, saltedPassword, saltCol,
-                                    self.salt.decode('utf-8'), usernameCol, self.username))
+        if(len(records) < 2):
+            if (records != []):
+                query = f"UPDATE %s SET %s = '{saltedPassword}', %s = '{self.salt.decode('utf-8')}' WHERE %s = '%s'"
+                cursor.execute(query % (tableName,
+                                        passwordCol, saltCol,
+                                        usernameCol, self.username))
             else:
-                query = "INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)"
-                cursor.execute(query, (tableName,
-                                    usernameCol, passwordCol, saltCol,
-                                    self.username, saltedPassword, self.salt.decode('utf-8')))
-        else:
-            self.salt = None
-            return None, None
+                query = f"INSERT INTO %s(%s, %s, %s) VALUES('%s', '{saltedPassword}', '{self.salt.decode('utf-8')}')"
+                cursor.execute(query % (tableName,
+                                        usernameCol, passwordCol, saltCol,
+                                        self.username))
 
         return saltedPassword, self.salt
 
@@ -194,17 +192,19 @@ class Dblogin:
     '''
 
     def setCsvCredentials(self, filePath,
-                        usernameCol, passwordCol, saltCol):
+                          usernameCol, passwordCol, saltCol):
 
         saltedPassword = self.setCredentials()[0]
 
         df = pd.read_csv(filePath)
-        row =  df.loc[df[usernameCol] == self.username]
+        row = df.loc[df[usernameCol] == self.username]
 
-        if(len(row) == 0):
-            df.loc[len(df)] = [self.username, saltedPassword, self.salt.decode('utf-8')]
-        elif(len(row) == 1):
-            df.loc[df[usernameCol] == self.username] = [self.username, saltedPassword, self.salt.decode('utf-8')]
+        if (len(row) == 0):
+            df.loc[len(df)] = [self.username, saltedPassword,
+                               self.salt.decode('utf-8')]
+        elif (len(row) == 1):
+            df.loc[df[usernameCol] == self.username] = [
+                self.username, saltedPassword, self.salt.decode('utf-8')]
         else:
             self.salt = None
             return None, None
@@ -212,6 +212,7 @@ class Dblogin:
         df.to_csv("login.csv", index=False)
 
         return saltedPassword, self.salt
+
 
 if __name__ == '__main__':
     test = Dblogin("Kaos", "test123")
