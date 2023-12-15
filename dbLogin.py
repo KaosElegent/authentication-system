@@ -8,7 +8,12 @@ from os import urandom
 # 32 byte utf-8 string for storage in string format
 from base64 import b64encode
 
+# pandas is used to give the option of working with csv files
+import pandas as pd
 
+# This project assumes the password and salt are stored in seperate columns.
+# This doesnt affect security in any way, good or bad.
+# All functions do nothing if more than 1 row has the same username
 class Dblogin:
 
     # The user's password is hashed and is never stored as plain text.
@@ -28,12 +33,12 @@ class Dblogin:
     '''
 
     def verify(self, dbPassword, salt):
-
+        
         # Hashing the password user entered with the salt from the database
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
                                              salt,
-                                             100000).hex()[:32]
+                                             100000).hex()[:64]
 
         if (dbPassword == saltedPassword):
             return True
@@ -67,12 +72,38 @@ class Dblogin:
         if (cursor.fetchall() != ()):
 
             # Fetch the first row (Ideally there's only 1 row)
-            record = cursor.fetchall()[0]
-            if self.verify(record[passwordCol], record[saltCol]):
-                return True
+            records = cursor.fetchall()
+            if(len(records) == 1):
+                if self.verify(records[0][passwordCol], records[0][saltCol].encode('utf-8')):
+                    return True
 
         return False
 
+    '''
+    Description: This function provides an easy way to verify credentials
+                using CSV files
+    @param filePath: A string representing the path to the CSV file.
+    @param usernameCol: A string representing the column name where
+                the username is stored.
+    @param passwordCol: A string representing the column name where
+                the salted password is stored.
+    @param saltCol: A string representing the column name where
+                the salt is stored.
+    @returns boolean: True if the credentials match, else False.
+    '''
+
+    def csvVerification(self, filePath,
+                        usernameCol, passwordCol, saltCol):
+
+        df = pd.read_csv(filePath)
+        row =  df.loc[df[usernameCol] == self.username]
+
+        if(len(row) == 1):
+            if self.verify(row[passwordCol].iloc[0], row[saltCol].iloc[0].encode('utf-8')):
+                return True
+
+        return False
+    
     '''
     Description: This function is used for updating the current salt
                 and returning the new salted password.
@@ -84,7 +115,7 @@ class Dblogin:
     @returns 2 values: salted password, salt
     '''
 
-    def setCredentials(self, strSalt=0):
+    def setCredentials(self):
 
         # 32 Random cryptografically safe bytes
         '''
@@ -94,15 +125,12 @@ class Dblogin:
         work with the byte-like object while keeping it just as
         randomized.
         '''
-        if strSalt:
-            self.salt = b64encode(urandom(32))[:32]
-        else:
-            self.salt = urandom(32)
+        self.salt = b64encode(urandom(64))[:64]
 
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
                                              self.salt,
-                                             100000).hex()[:32]
+                                             100000).hex()[:64]
         return saltedPassword, self.salt
 
     '''
@@ -131,19 +159,59 @@ class Dblogin:
         cursor.execute(query, (tableName, usernameCol, self.username))
 
         # If such a column was found in the database
-        if (cursor.fetchall() != ()):
-            query = "UPDATE %s SET %s = %s, %s = %s WHERE %s = '%s'"
-            cursor.execute(query, (tableName,
-                                   passwordCol, saltedPassword, saltCol,
-                                   str(self.salt), usernameCol, self.username))
+        if(len(cursor.fetchall()) == 1):
+            if (cursor.fetchall() != ()):
+                query = "UPDATE %s SET %s = %s, %s = %s WHERE %s = '%s'"
+                cursor.execute(query, (tableName,
+                                    passwordCol, saltedPassword, saltCol,
+                                    self.salt.decode('utf-8'), usernameCol, self.username))
+            else:
+                query = "INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)"
+                cursor.execute(query, (tableName,
+                                    usernameCol, passwordCol, saltCol,
+                                    self.username, saltedPassword, self.salt.decode('utf-8')))
         else:
-            query = "INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)"
-            cursor.execute(query, (tableName,
-                                   usernameCol, passwordCol, saltCol,
-                                   self.username, saltedPassword, str(self.salt)))
+            self.salt = None
+            return None, None
 
         return saltedPassword, self.salt
 
+    '''
+    Description: This function is used for updating the current salt
+                and returning the new salted password.
+    @param cursor: A pymysql (or similar) connection cursor object
+                used for connecting to the SQL database.
+    @param tableName: A string representing the table name where
+                login data is stored.
+    @param usernameCol: A string representing the column name where
+                the username is stored.
+    @param passwordCol: A string representing the column name where
+                the salted password is stored.
+    @param saltCol: A string representing the column name where
+                the salt is stored.
+    @returns 2 values: salted password, salt
+    Returns None, None if more than 1 columns match the username
+    '''
+
+    def setCsvCredentials(self, filePath,
+                        usernameCol, passwordCol, saltCol):
+
+        saltedPassword = self.setCredentials()[0]
+
+        df = pd.read_csv(filePath)
+        row =  df.loc[df[usernameCol] == self.username]
+
+        if(len(row) == 0):
+            df.loc[len(df)] = [self.username, saltedPassword, self.salt.decode('utf-8')]
+        elif(len(row) == 1):
+            df.loc[df[usernameCol] == self.username] = [self.username, saltedPassword, self.salt.decode('utf-8')]
+        else:
+            self.salt = None
+            return None, None
+
+        df.to_csv("login.csv", index=False)
+
+        return saltedPassword, self.salt
 
 if __name__ == '__main__':
     test = Dblogin("Kaos", "test123")
