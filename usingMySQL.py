@@ -54,7 +54,7 @@ def alter():
                                  "username", "password", "salt")[1]:
         print("Credentials Altered Successfully!")
     else:
-        print("There was a system error!")
+        print("There was a system error! Multiple Users with same username!")
 
 
 def menu():
