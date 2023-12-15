@@ -34,7 +34,7 @@ def login(csvFile):
     details = Dblogin(input("Username: "), input("Password: "))
 
     if (csvFile):
-        if details.csvVerification("login.csv", "Username", "Password", "Salt"):
+        if details.csvVerification("Data\\login.csv", "Username", "Password", "Salt"):
             print("Login Successful!\n")
         else:
             print("Invalid Credentials!\n")
@@ -56,7 +56,7 @@ def alter(csvFile):
 
     if (csvFile):
         if details.setCsvCredentials(
-                "login.csv", "Username", "Password", "Salt")[1]:
+                "Data\\login.csv", "Username", "Password", "Salt")[1]:
             print("Credentials Updated/Added Successfully!")
         else:
             print("There was a system error!")
