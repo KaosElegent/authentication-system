@@ -2,41 +2,32 @@
 Author: Shrey Bhatt
 Date: December 11th, 2023
 '''
-# Requirements
-#import pymysql.cursors    #If using pymysql for database connection
 
 # Since I'm using csv for demo here
+import pandas as pd
+
 import csv
 
-# b64encode is used to convert the random 32 byte salt to a
-# 32 byte utf-8 string for storage in string format
-from base64 import b64encode
-
-from saltedLogin import Dblogin
-
-
-# Database Connection (For this Demo, I'll be using CSV to simulate a database
-#                      But the following syntax can be used to work
-#                      with Dblogin objects.
-'''
-connection = pymysql.connect(host=os.getenv("HOST"),
-                             user=os.getenv("USERNAME"),
-                             password=os.getenv("PASSWORD"),
-                             database=os.getenv("DATABASE"),
-                             cursorclass=pymysql.cursors.DictCursor,
-
-                             autocommit = True,
-                             ssl_verify_identity = True,
-                             ssl      = {
-                             "ca": <CA Certificate Location>
-                             })
-cursor = connection.cursor()
-'''
+from dbLogin import Dblogin
 
 def login():
-    # Try: Elegent, test123
     details = Dblogin(input("Username: "), input("Password: "))
 
+    df = pd.read_csv('login.csv')
+
+    row =  df.loc[df['Username'] == details.username]
+
+    print(row)
+
+    '''
+    if(len(row) == 1):
+        if details.verify(row[1], row[2].encode('utf-8')):
+                    print ("Login Successful!\n")
+                else:
+                    print ("Information Entered Was Incorrect!\n")
+    '''
+                    
+    '''
     with open('login.csv', newline='\n') as csvFile:
 
         rows = csv.reader(csvFile, delimiter=',')
@@ -50,6 +41,7 @@ def login():
                 return
         print ("Information Entered Was Incorrect!\n")
         return
+    '''
 
 def alter():
     while(True):
@@ -58,7 +50,7 @@ def alter():
         else: print("Enter again!\n")
 
     saltedPassword, salt = details.setCredentials(strSalt=True)
-    with open('login.csv', 'w', newline='\n') as csvfile:
+    with open('login.csv', 'a', newline='\n') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
 
         writer.writerow([details.username, saltedPassword, salt.decode('utf-8')])

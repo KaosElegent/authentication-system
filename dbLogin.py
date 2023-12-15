@@ -10,7 +10,7 @@ from base64 import b64encode
 
 
 class Dblogin:
-    
+
     # The user's password is hashed and is never stored as plain text.
     # Note: This object uses the salt as a byte-like object.
     # But for real use case a normal 32 byte string would be used
@@ -18,7 +18,7 @@ class Dblogin:
         self.username = username
         self.password = hashlib.sha256(password.encode('utf-8')).hexdigest()
         self.salt = None
-    
+
     '''
     Description: This function is to be called once database connection
                 has been made and there is a record with matching username.
@@ -26,6 +26,7 @@ class Dblogin:
     @param salt: The salt retrieved from the database.
     @returns boolean: True if the credentials match, else False.
     '''
+
     def verify(self, dbPassword, salt):
 
         # Hashing the password user entered with the salt from the database
@@ -34,8 +35,10 @@ class Dblogin:
                                              salt,
                                              100000).hex()[:32]
 
-        if(dbPassword == saltedPassword): return True
-        else: return False
+        if (dbPassword == saltedPassword):
+            return True
+        else:
+            return False
 
     '''
     Description: This function uses string formatting & parameterized
@@ -52,6 +55,7 @@ class Dblogin:
                 the salt is stored.
     @returns boolean: True if the credentials match, else False.
     '''
+
     def sqlVerification(self, cursor,
                         tableName, usernameCol, passwordCol, saltCol):
 
@@ -60,10 +64,10 @@ class Dblogin:
         cursor.execute(query, (tableName, usernameCol, self.username))
 
         # If such a column was found in the database
-        if(cursor.fetchall() != ()):
+        if (cursor.fetchall() != ()):
 
             # Fetch the first row (Ideally there's only 1 row)
-            record = cursor.fetchall()[0] 
+            record = cursor.fetchall()[0]
             if self.verify(record[passwordCol], record[saltCol]):
                 return True
 
@@ -79,11 +83,12 @@ class Dblogin:
                 bytes which can't be decoded to utf-8.
     @returns 2 values: salted password, salt
     '''
-    def setCredentials(self, strSalt = 0):
-        
+
+    def setCredentials(self, strSalt=0):
+
         # 32 Random cryptografically safe bytes
         '''
-        the 32 randombytes from urandom are encoded in base64
+        The 32 randombytes from urandom are encoded in base64
         to remove any non utf-8 bytes. Having utf-8 bytes might
         sound less secure but this makes it easier to store and
         work with the byte-like object while keeping it just as
@@ -99,7 +104,7 @@ class Dblogin:
                                              self.salt,
                                              100000).hex()[:32]
         return saltedPassword, self.salt
-    
+
     '''
     Description: This function is used for updating the current salt
                 and returning the new salted password.
@@ -115,8 +120,9 @@ class Dblogin:
                 the salt is stored.
     @returns 2 values: salted password, salt
     '''
+
     def setSqlCredentials(self, cursor,
-                        tableName, usernameCol, passwordCol, saltCol):
+                          tableName, usernameCol, passwordCol, saltCol):
 
         saltedPassword = self.newCredentials()[0]
 
@@ -125,22 +131,18 @@ class Dblogin:
         cursor.execute(query, (tableName, usernameCol, self.username))
 
         # If such a column was found in the database
-        if(cursor.fetchall() != ()):
+        if (cursor.fetchall() != ()):
             query = "UPDATE %s SET %s = %s, %s = %s WHERE %s = '%s'"
             cursor.execute(query, (tableName,
                                    passwordCol, saltedPassword, saltCol,
-                                   self.salt, usernameCol, self.username))
+                                   str(self.salt), usernameCol, self.username))
         else:
             query = "INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)"
             cursor.execute(query, (tableName,
                                    usernameCol, passwordCol, saltCol,
-                                   self.username, saltedPassword, self.salt))
-            
+                                   self.username, saltedPassword, str(self.salt)))
 
         return saltedPassword, self.salt
-    
-
-
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 #Custom
-oldLogin.py
+pyvenv.cfg
+Scripts/
 test.py
 
 # Byte-compiled / optimized / DLL files
