@@ -10,6 +10,7 @@ import pymysql.cursors
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
 # --------------------------------------------------
 
 from dbLogin import Dblogin  # For using the custom class
@@ -21,7 +22,7 @@ connection = pymysql.connect(host=os.getenv("DATABASE_HOST"),
                              database=os.getenv("DATABASE"),
                              cursorclass=pymysql.cursors.DictCursor,
 
-                             autocommit=False,
+                             autocommit=True,
                              ssl_verify_identity=True,
                              ssl={
                              "ca": certifi.where()
@@ -51,7 +52,7 @@ def alter(csvFile):
         if (input("Confirm? (y/n)").lower() == 'y'):
             break
         else:
-            print("Enter again!\n")
+            return
 
     if (csvFile):
         if details.setCsvCredentials(
@@ -82,14 +83,14 @@ def menu():
         if fileType in ['1', '2']:
             while True:
                 print(
-                    """
-        ----------------------------------------------------
-                       Working with Credentials             
-        ----------------------------------------------------
-        1) Login
-        2) Add/Update User
-        0) Go Back (Main Menu)
-        """)
+"""
+----------------------------------------------------
+                Working with Credentials             
+----------------------------------------------------
+1) Login
+2) Add/Update User
+0) Go Back (Main Menu)
+""")
                 taskType = input("> ")
                 if taskType == '1':
                     if fileType == '1':

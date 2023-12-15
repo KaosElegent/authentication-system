@@ -73,7 +73,7 @@ class Dblogin:
         # Fetch the rows (Ideally there's only 1 row)
         records = cursor.fetchall()
         # If such a column was found in the database
-        if (records != []):
+        if (records != ()):
             if (len(records) == 1):
                 if self.verify(records[0][passwordCol], records[0][saltCol].encode('utf-8')):
                     return True
@@ -159,9 +159,10 @@ class Dblogin:
         query = "SELECT * FROM %s WHERE %s = '%s'"
         cursor.execute(query % (tableName, usernameCol, self.username))
         records = cursor.fetchall()
+        print(records)
         # If such a column was found in the database
         if(len(records) < 2):
-            if (records != []):
+            if (records != ()):
                 query = f"UPDATE %s SET %s = '{saltedPassword}', %s = '{self.salt.decode('utf-8')}' WHERE %s = '%s'"
                 cursor.execute(query % (tableName,
                                         passwordCol, saltCol,
