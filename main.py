@@ -8,11 +8,7 @@ Date: December 11th, 2023
 # Since I'm using csv for demo here
 import csv
 
-# b64encode is used to convert the random 32 byte salt to a
-# 32 byte utf-8 string for storage in string format
-from base64 import b64encode
-
-from saltedLogin import Dblogin
+from dbLogin import Dblogin
 
 
 # Database Connection (For this Demo, I'll be using CSV to simulate a database
@@ -34,7 +30,6 @@ cursor = connection.cursor()
 '''
 
 def login():
-    # Try: Elegent, test123
     details = Dblogin(input("Username: "), input("Password: "))
 
     with open('login.csv', newline='\n') as csvFile:
@@ -58,7 +53,7 @@ def alter():
         else: print("Enter again!\n")
 
     saltedPassword, salt = details.setCredentials(strSalt=True)
-    with open('login.csv', 'w', newline='\n') as csvfile:
+    with open('login.csv', 'a', newline='\n') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
 
         writer.writerow([details.username, saltedPassword, salt.decode('utf-8')])
