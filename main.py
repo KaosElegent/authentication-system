@@ -1,11 +1,9 @@
 # ----------- For using a MySQL Database -----------
 
-# To get ca certificates for the databse connection
 from dbLogin import Dblogin  # For using the custom class
-import certifi
 
 # To connect to a MySQL database
-import pymysql.cursors
+import mysql.connector
 
 # To use environment variables
 import os
@@ -16,17 +14,10 @@ load_dotenv()
 
 
 # The database connection object
-connection = pymysql.connect(host=os.getenv("DATABASE_HOST"),
-                             user=os.getenv("DATABASE_USERNAME"),
-                             password=os.getenv("DATABASE_PASSWORD"),
-                             database=os.getenv("DATABASE"),
-                             cursorclass=pymysql.cursors.DictCursor,
-
-                             autocommit=True,
-                             ssl_verify_identity=True,
-                             ssl={
-                             "ca": certifi.where()
-                             })
+connection = mysql.connector.connect(host=os.getenv("DATABASE_HOST"),
+                                     user=os.getenv("DATABASE_USERNAME"),
+                                     password=os.getenv("DATABASE_PASSWORD"),
+                                     database=os.getenv("DATABASE"))
 cursor = connection.cursor()
 
 

@@ -12,8 +12,9 @@ from base64 import b64encode
 import pandas as pd
 
 # This project assumes the password and salt are stored in seperate columns.
-# This doesnt affect security in any way, good or bad.
-# All functions do nothing if more than 1 row has the same username
+# This assumption doesnt affect security in any way, good or bad.
+# All functions do nothing if more than 1 record is found
+# with the same username.
 
 
 class Dblogin:
@@ -64,21 +65,23 @@ class Dblogin:
     '''
 
     def sqlVerification(self, cursor,
-                        tableName = "login",
-                        usernameCol = "username",
-                        passwordCol = "password",
-                        saltCol = "salt"):
+                        tableName="login",
+                        usernameCol="username",
+                        passwordCol="password",
+                        saltCol="salt"):
 
         # Parameterized Query (safeguard against SQL Injection)
-        query = "SELECT * FROM %s WHERE %s = '%s'"
-        cursor.execute(query % (tableName, usernameCol, self.username))
+        # Note: tableName and usernameCol arn't entered by the user
+        query = f"SELECT * FROM {tableName} WHERE {usernameCol} = %s"
+        cursor.execute(query, (self.username,))
 
         # Fetch the rows (Ideally there's only 1 row)
         records = cursor.fetchall()
         # If such a column was found in the database
         if (records != ()):
             if (len(records) == 1):
-                if self.verify(records[0][passwordCol], records[0][saltCol].encode('utf-8')):
+                if self.verify(records[0][passwordCol],
+                               records[0][saltCol].encode('utf-8')):
                     return True
 
         return False
@@ -97,15 +100,16 @@ class Dblogin:
     '''
 
     def csvVerification(self, filePath,
-                        usernameCol = "username",
-                        passwordCol = "password",
-                        saltCol = "salt"):
+                        usernameCol="username",
+                        passwordCol="password",
+                        saltCol="salt"):
 
         df = pd.read_csv(filePath)
         row = df.loc[df[usernameCol] == self.username]
 
         if (len(row) == 1):
-            if self.verify(row[passwordCol].iloc[0], row[saltCol].iloc[0].encode('utf-8')):
+            if self.verify(row[passwordCol].iloc[0],
+                           row[saltCol].iloc[0].encode('utf-8')):
                 return True
 
         return False
@@ -156,30 +160,37 @@ class Dblogin:
     '''
 
     def setSqlCredentials(self, cursor,
-                        tableName = "login",
-                        usernameCol = "username",
-                        passwordCol = "password",
-                        saltCol = "salt"):
+                          tableName="login",
+                          usernameCol="username",
+                          passwordCol="password",
+                          saltCol="salt"):
 
         saltedPassword = self.setCredentials()[0]
 
         # Parameterized Query (safeguard against SQL Injection)
-        query = "SELECT * FROM %s WHERE %s = '%s'"
-        cursor.execute(query % (tableName, usernameCol, self.username))
+        # table and column identifiers are SQL safe
+        query = f"SELECT * FROM {tableName} WHERE {usernameCol} = %s"
+        cursor.execute(query, (self.username,))
         records = cursor.fetchall()
-        print(records)
-        # If such a column was found in the database
-        if(len(records) < 2):
+
+        if (len(records) < 2):
             if (records != ()):
-                query = f"UPDATE %s SET %s = '{saltedPassword}', %s = '{self.salt.decode('utf-8')}' WHERE %s = '%s'"
-                cursor.execute(query % (tableName,
-                                        passwordCol, saltCol,
-                                        usernameCol, self.username))
+
+                # table/column identifiers and salts are SQL safe
+                query = f"UPDATE {tableName} SET \
+                        {passwordCol} = '{saltedPassword}', \
+                        {saltCol} = '{self.salt.decode('utf-8')}' \
+                        WHERE {usernameCol} = %s"
+
+                cursor.execute(query, (self.username,))
+
             else:
-                query = f"INSERT INTO %s(%s, %s, %s) VALUES('%s', '{saltedPassword}', '{self.salt.decode('utf-8')}')"
-                cursor.execute(query % (tableName,
-                                        usernameCol, passwordCol, saltCol,
-                                        self.username))
+                query = f"INSERT INTO \
+                        {tableName}({usernameCol}, {passwordCol}, {saltCol}) \
+                        VALUES \
+                        (%s, '{saltedPassword}', '{self.salt.decode('utf-8')}')"
+
+                cursor.execute(query, (self.username,))
 
         return saltedPassword, self.salt
 
@@ -201,7 +212,7 @@ class Dblogin:
     '''
 
     def setCsvCredentials(self, filePath,
-                          usernameCol = "username"):
+                          usernameCol="username"):
 
         saltedPassword = self.setCredentials()[0]
 
@@ -215,7 +226,7 @@ class Dblogin:
         if (len(row) == 0):
             df.loc[len(df)] = [self.username, saltedPassword,
                                self.salt.decode('utf-8')]
-                               
+
         elif (len(row) == 1):
             df.loc[df[usernameCol] == self.username] = [
                 self.username, saltedPassword, self.salt.decode('utf-8')]

@@ -1,8 +1,7 @@
-certifi==2023.11.17
-load-dotenv==0.1.0
+mysql-connector-python==8.2.0
 numpy==1.26.2
 pandas==2.1.4
-PyMySQL==1.1.0
+protobuf==4.21.12
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 pytz==2023.3.post1
