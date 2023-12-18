@@ -1,8 +1,9 @@
 #Custom
 pyvenv.cfg
 Scripts/
-usingCSV.py
-usingMySQL.py
+bin/
+oldLogin.py
+test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
