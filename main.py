@@ -1,6 +1,7 @@
 # ----------- For using a MySQL Database -----------
 
 # To get ca certificates for the databse connection
+from dbLogin import Dblogin  # For using the custom class
 import certifi
 
 # To connect to a MySQL database
@@ -13,7 +14,6 @@ load_dotenv()
 
 # --------------------------------------------------
 
-from dbLogin import Dblogin  # For using the custom class
 
 # The database connection object
 connection = pymysql.connect(host=os.getenv("DATABASE_HOST"),
@@ -34,13 +34,12 @@ def login(csvFile):
     details = Dblogin(input("Username: "), input("Password: "))
 
     if (csvFile):
-        if details.csvVerification("Data\\login.csv", "Username", "Password", "Salt"):
+        if details.csvVerification(filePath="Data\\login.csv"):
             print("Login Successful!\n")
         else:
             print("Invalid Credentials!\n")
     else:
-        if details.sqlVerification(cursor, "loginInfo",
-                                   "username", "password", "salt"):
+        if details.sqlVerification(cursor=cursor, tableName="loginInfo",):
             print("Login Successful!\n")
         else:
             print("Invalid Credentials!\n")
@@ -55,14 +54,12 @@ def alter(csvFile):
             return
 
     if (csvFile):
-        if details.setCsvCredentials(
-                "Data\\login.csv", "Username", "Password", "Salt")[1]:
+        if details.setCsvCredentials(filePath="Data\\login.csv")[1]:
             print("Credentials Updated/Added Successfully!")
         else:
             print("There was a system error!")
     else:
-        if details.setSqlCredentials(cursor, "loginInfo",
-                                     "username", "password", "salt")[1]:
+        if details.setSqlCredentials(cursor=cursor, tableName="loginInfo")[1]:
             print("Credentials Altered Successfully!")
         else:
             print("There was a system error! Multiple Users with same username!")
@@ -83,7 +80,7 @@ def menu():
         if fileType in ['1', '2']:
             while True:
                 print(
-"""
+                    """
 ----------------------------------------------------
                 Working with Credentials             
 ----------------------------------------------------

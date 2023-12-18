@@ -64,7 +64,10 @@ class Dblogin:
     '''
 
     def sqlVerification(self, cursor,
-                        tableName, usernameCol, passwordCol, saltCol):
+                        tableName = "login",
+                        usernameCol = "username",
+                        passwordCol = "password",
+                        saltCol = "salt"):
 
         # Parameterized Query (safeguard against SQL Injection)
         query = "SELECT * FROM %s WHERE %s = '%s'"
@@ -94,7 +97,9 @@ class Dblogin:
     '''
 
     def csvVerification(self, filePath,
-                        usernameCol, passwordCol, saltCol):
+                        usernameCol = "username",
+                        passwordCol = "password",
+                        saltCol = "salt"):
 
         df = pd.read_csv(filePath)
         row = df.loc[df[usernameCol] == self.username]
@@ -151,7 +156,10 @@ class Dblogin:
     '''
 
     def setSqlCredentials(self, cursor,
-                          tableName, usernameCol, passwordCol, saltCol):
+                        tableName = "login",
+                        usernameCol = "username",
+                        passwordCol = "password",
+                        saltCol = "salt"):
 
         saltedPassword = self.setCredentials()[0]
 
@@ -193,16 +201,21 @@ class Dblogin:
     '''
 
     def setCsvCredentials(self, filePath,
-                          usernameCol, passwordCol, saltCol):
+                          usernameCol = "username"):
 
         saltedPassword = self.setCredentials()[0]
 
         df = pd.read_csv(filePath)
         row = df.loc[df[usernameCol] == self.username]
 
+        '''
+        For CSV files it is assumed only 3 columns exist.
+        And the data is stored as username, password and salt respectively
+        '''
         if (len(row) == 0):
             df.loc[len(df)] = [self.username, saltedPassword,
                                self.salt.decode('utf-8')]
+                               
         elif (len(row) == 1):
             df.loc[df[usernameCol] == self.username] = [
                 self.username, saltedPassword, self.salt.decode('utf-8')]
@@ -210,7 +223,7 @@ class Dblogin:
             self.salt = None
             return None, None
 
-        df.to_csv("login.csv", index=False)
+        df.to_csv(filePath, index=False)
 
         return saltedPassword, self.salt
 
