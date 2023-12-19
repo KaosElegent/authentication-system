@@ -1,7 +1,9 @@
 
 # Secure Authentication/Login System
 
-Hey there! This repo contains the **dbLogin** module. The DbLogin class can be used to manage and work with login credentials without worrying about hashing and salting yourself.
+Hey there! This repo contains the **dbLogin** module. The DbLogin class can manage and work with login credentials without worrying about hashing and salting yourself.
+
+The project was originally started a few months ago as a part of a web-based portal for database management. However, due to personal circumstances, it was halted.
 
 # Table of Contents
 
@@ -115,4 +117,4 @@ The username and password (which gets hashed as soon as possible) are taken from
 
 - This project assumes that the password and salt are stored in separate columns.
 - The DbLogin functions will return invalid authentication/credentials if more than 1 record has the same required username.
-- The CSV based functions assume that the file only contains 3 columns (username, password, salt)
+- The CSV-based functions assume that the file only contains 3 columns (username, password, salt)
