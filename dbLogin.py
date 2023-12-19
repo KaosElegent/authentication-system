@@ -41,7 +41,7 @@ class Dblogin:
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
                                              salt,
-                                             100000).hex()[:64]
+                                             100000).hex()#[:64]
 
         if (dbPassword == saltedPassword):
             return True
@@ -140,7 +140,7 @@ class Dblogin:
         saltedPassword = hashlib.pbkdf2_hmac('sha256',
                                              self.password.encode('utf-8'),
                                              self.salt,
-                                             100000).hex()[:64]
+                                             100000).hex()#[:64]
         return saltedPassword, self.salt
 
     '''
