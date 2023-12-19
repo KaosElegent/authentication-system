@@ -7,18 +7,18 @@ Hey there! This repo contains the **dbLogin** module. The DbLogin class can be u
 
 -  ![Files](#files)
 
--  ![Why Salt and Hash?](#why-salt-and-hash?) 
-   - ![Normal Password Storage](#normal-password-storage)
-   - ![Hashed Password Storage](#hashed-password-storage)
-   - ![Salted & Hashed Password Storage](#salted--hashed-password-storage)
+-  ![Why Salt and Hash?](https://github.com/KaosElegent/database-login-system/tree/main#why-salt-and-hash?) 
+   - ![Normal Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#normal-password-storage)
+   - ![Hashed Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#hashed-password-storage)
+   - ![Salted & Hashed Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#salted--hashed-password-storage)
 
 - ![Implementation](#implementation)
-  - ![Create or Update an Existing User](#create-or-update-an-existing-user)
-  - ![Authenticate an Existing User](#authenticate-an-existing-user)
+  - ![Create or Update an Existing User](https://github.com/KaosElegent/database-login-system/tree/main#create-or-update-an-existing-user)
+  - ![Authenticate an Existing User](https://github.com/KaosElegent/database-login-system/tree/main#authenticate-an-existing-user)
 
-- ![Working Demo](#working-demo)
+- ![Working Demo](https://github.com/KaosElegent/database-login-system/tree/main#working-demo)
 
-- ![Notes](#notes)
+- ![Notes](https://github.com/KaosElegent/database-login-system/tree/main#notes)
 
 # Files
 
@@ -91,19 +91,23 @@ The username and password (which gets hashed as soon as possible) are taken from
 # Working Demo
 
 
-- The main menu :
+- **The main menu :**
 
 ![Main Menu](https://github.com/KaosElegent/database-login-system/blob/main/images/mainMenu.png?raw=true)
-- User creation :
+
+- **User creation :**
 
 ![User Creation](https://github.com/KaosElegent/database-login-system/blob/main/images/addUser.png?raw=true)
-- User credentials updated :  
+
+- **User credentials updated :**
 
 ![User Updated](https://github.com/KaosElegent/database-login-system/blob/main/images/updateUser.png?raw=true)
-- Invalid user credentials :
+
+- **Invalid user credentials :**
 
 ![Invalid Credentials](https://github.com/KaosElegent/database-login-system/blob/main/images/invalidLogin.png?raw=true)
-- Valid user credentials :
+
+- **Valid user credentials :**
 
 ![Valid Credentials](https://github.com/KaosElegent/database-login-system/blob/main/images/login.png?raw=true)  
 
