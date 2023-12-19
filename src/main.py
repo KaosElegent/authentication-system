@@ -17,7 +17,8 @@ load_dotenv()
 connection = mysql.connector.connect(host=os.getenv("DATABASE_HOST"),
                                      user=os.getenv("DATABASE_USERNAME"),
                                      password=os.getenv("DATABASE_PASSWORD"),
-                                     database=os.getenv("DATABASE"))
+                                     database=os.getenv("DATABASE"),
+                                     autocommit=True)
 cursor = connection.cursor()
 
 
@@ -100,6 +101,7 @@ def menu():
         else:
             print("Invalid Input!\n")
 
+    cursor.close()
     print("\n-------------------------------\nThank you for using the System!\n-------------------------------")
 
 

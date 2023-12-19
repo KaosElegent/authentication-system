@@ -11,12 +11,6 @@ from base64 import b64encode
 # pandas is used to give the option of working with csv files
 import pandas as pd
 
-# This project assumes the password and salt are stored in seperate columns.
-# This assumption doesnt affect security in any way, good or bad.
-# All functions do nothing if more than 1 record is found
-# with the same username.
-
-
 class Dblogin:
 
     # The user's password is hashed and is never stored as plain text.
@@ -72,7 +66,7 @@ class Dblogin:
 
         # Parameterized Query (safeguard against SQL Injection)
         # Note: tableName and usernameCol arn't entered by the user
-        query = f"SELECT * FROM {tableName} WHERE {usernameCol} = %s"
+        query = f"SELECT {passwordCol}, {saltCol} FROM {tableName} WHERE {usernameCol} = %s"
         cursor.execute(query, (self.username,))
 
         # Fetch the rows (Ideally there's only 1 row)
@@ -80,8 +74,8 @@ class Dblogin:
         # If such a column was found in the database
         if (records != ()):
             if (len(records) == 1):
-                if self.verify(records[0][passwordCol],
-                               records[0][saltCol].encode('utf-8')):
+                if self.verify(records[0][0],
+                               records[0][1].encode('utf-8')):
                     return True
 
         return False
@@ -174,14 +168,13 @@ class Dblogin:
         records = cursor.fetchall()
 
         if (len(records) < 2):
-            if (records != ()):
+            if (len(records) == 1):
 
                 # table/column identifiers and salts are SQL safe
                 query = f"UPDATE {tableName} SET \
                         {passwordCol} = '{saltedPassword}', \
                         {saltCol} = '{self.salt.decode('utf-8')}' \
                         WHERE {usernameCol} = %s"
-
                 cursor.execute(query, (self.username,))
 
             else:
@@ -191,6 +184,9 @@ class Dblogin:
                         (%s, '{saltedPassword}', '{self.salt.decode('utf-8')}')"
 
                 cursor.execute(query, (self.username,))
+        else:
+            self.salt=None
+            return None, None
 
         return saltedPassword, self.salt
 
