@@ -233,8 +233,3 @@ class Dblogin:
         df.to_csv(filePath, index=False)
 
         return saltedPassword, self.salt
-
-
-if __name__ == '__main__':
-    test = Dblogin("Kaos", "test123")
-    print(test.setCredentials())
