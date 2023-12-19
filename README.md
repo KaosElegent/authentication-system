@@ -1,5 +1,5 @@
 
-# Secure Login System
+# Secure Authentication/Login System
 
 Hey there! This repo contains the **dbLogin** module. The DbLogin class can be used to manage and work with login credentials without worrying about hashing and salting yourself.
 
