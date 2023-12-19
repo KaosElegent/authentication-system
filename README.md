@@ -5,20 +5,20 @@ Hey there! This repo contains the **dbLogin** module. The DbLogin class can be u
 
 # Table of Contents
 
--  ![Files](https://github.com/KaosElegent/database-login-system/tree/main#files)
+-  [Files](https://github.com/KaosElegent/database-login-system/tree/main#files)
 
--  ![Why Salt and Hash?](https://github.com/KaosElegent/database-login-system/tree/main#why-salt-and-hash) 
-   - ![Normal Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#normal-password-storage)
-   - ![Hashed Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#hashed-password-storage-sha-256)
-   - ![Salted & Hashed Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#salted--hashed-password-storage)
+-  [Why Salt and Hash?](https://github.com/KaosElegent/database-login-system/tree/main#why-salt-and-hash) 
+   - [Normal Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#normal-password-storage)
+   - [Hashed Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#hashed-password-storage-sha-256)
+   - [Salted & Hashed Password Storage](https://github.com/KaosElegent/database-login-system/tree/main#salted--hashed-password-storage)
 
-- ![Implementation](#implementation)
-  - ![Create or Update an Existing User](https://github.com/KaosElegent/database-login-system/tree/main#create-or-update-an-existing-user-)
-  - ![Authenticate an Existing User](https://github.com/KaosElegent/database-login-system/tree/main#authenticate-an-existing-user-)
+- [Implementation](#implementation)
+  - [Create or Update an Existing User](https://github.com/KaosElegent/database-login-system/tree/main#create-or-update-an-existing-user-)
+  - [Authenticate an Existing User](https://github.com/KaosElegent/database-login-system/tree/main#authenticate-an-existing-user-)
 
-- ![Working Demo](https://github.com/KaosElegent/database-login-system/tree/main#working-demo)
+- [Working Demo](https://github.com/KaosElegent/database-login-system/tree/main#working-demo)
 
-- ![Notes](https://github.com/KaosElegent/database-login-system/tree/main#notes)
+- [Notes](https://github.com/KaosElegent/database-login-system/tree/main#notes)
 
 # Files
 
